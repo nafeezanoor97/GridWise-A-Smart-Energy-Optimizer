@@ -1,0 +1,44 @@
+export const sampleScenario = {
+  scenario_id: "GRID-101",
+
+  operator_notes: [
+    "Solar output will drop to about 20% from 1 PM to 3 PM.",
+    "Do not charge the battery between 2 PM and 4 PM.",
+    "The cafeteria menu changes tomorrow."
+  ],
+
+  hours: [
+    { hour: 0, demand_kwh: 180, solar_kwh: 0, tariff_bdt_per_kwh: 7 },
+    { hour: 1, demand_kwh: 170, solar_kwh: 0, tariff_bdt_per_kwh: 7 },
+    { hour: 2, demand_kwh: 160, solar_kwh: 0, tariff_bdt_per_kwh: 6 },
+    { hour: 3, demand_kwh: 160, solar_kwh: 0, tariff_bdt_per_kwh: 6 },
+    { hour: 4, demand_kwh: 170, solar_kwh: 0, tariff_bdt_per_kwh: 6 },
+    { hour: 5, demand_kwh: 180, solar_kwh: 10, tariff_bdt_per_kwh: 7 },
+    { hour: 6, demand_kwh: 190, solar_kwh: 30, tariff_bdt_per_kwh: 8 },
+    { hour: 7, demand_kwh: 200, solar_kwh: 50, tariff_bdt_per_kwh: 9 },
+    { hour: 8, demand_kwh: 220, solar_kwh: 80, tariff_bdt_per_kwh: 10 },
+    { hour: 9, demand_kwh: 230, solar_kwh: 100, tariff_bdt_per_kwh: 10 },
+    { hour: 10, demand_kwh: 240, solar_kwh: 120, tariff_bdt_per_kwh: 11 },
+    { hour: 11, demand_kwh: 250, solar_kwh: 130, tariff_bdt_per_kwh: 11 },
+    { hour: 12, demand_kwh: 260, solar_kwh: 140, tariff_bdt_per_kwh: 12 },
+    { hour: 13, demand_kwh: 260, solar_kwh: 150, tariff_bdt_per_kwh: 12 },
+    { hour: 14, demand_kwh: 250, solar_kwh: 140, tariff_bdt_per_kwh: 11 },
+    { hour: 15, demand_kwh: 240, solar_kwh: 120, tariff_bdt_per_kwh: 10 },
+    { hour: 16, demand_kwh: 230, solar_kwh: 100, tariff_bdt_per_kwh: 10 },
+    { hour: 17, demand_kwh: 240, solar_kwh: 70, tariff_bdt_per_kwh: 11 },
+    { hour: 18, demand_kwh: 250, solar_kwh: 30, tariff_bdt_per_kwh: 12 },
+    { hour: 19, demand_kwh: 240, solar_kwh: 10, tariff_bdt_per_kwh: 11 },
+    { hour: 20, demand_kwh: 230, solar_kwh: 0, tariff_bdt_per_kwh: 10 },
+    { hour: 21, demand_kwh: 220, solar_kwh: 0, tariff_bdt_per_kwh: 9 },
+    { hour: 22, demand_kwh: 200, solar_kwh: 0, tariff_bdt_per_kwh: 8 },
+    { hour: 23, demand_kwh: 190, solar_kwh: 0, tariff_bdt_per_kwh: 7 }
+  ],
+
+  battery: {
+    capacity_kwh: 500,
+    initial_energy_kwh: 200,
+    minimum_energy_kwh: 50,
+    max_charge_kwh_per_hour: 100,
+    max_discharge_kwh_per_hour: 100
+  }
+};
