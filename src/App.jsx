@@ -10,8 +10,9 @@ import EnergyTable from "./components/EnergyTable";
 import { validateScenario } from "./utils/validation";
 import { sampleScenario } from "./utils/sampleData";
 
-import "./index.css";
+import { optimizeEnergy } from "./api";
 
+import "./index.css";
 
 // ============================================
 // Create Empty Scenario
@@ -21,7 +22,7 @@ const createEmptyScenario = () => ({
   scenario_id: "GRID-101",
 
   operator_notes: [
-    ""
+    "",
   ],
 
   hours: Array.from(
@@ -90,7 +91,6 @@ function App() {
 
     // Clear previous errors
     setErrors([]);
-
   };
 
 
@@ -104,24 +104,23 @@ function App() {
       ...sampleScenario,
 
       operator_notes: [
-        ...sampleScenario.operator_notes
+        ...sampleScenario.operator_notes,
       ],
 
       hours: [
-        ...sampleScenario.hours
+        ...sampleScenario.hours,
       ],
 
       battery: {
-        ...sampleScenario.battery
-      }
+        ...sampleScenario.battery,
+      },
     });
 
-    // Clear old result
+    // Clear previous result
     setResult(null);
 
-    // Clear old errors
+    // Clear previous errors
     setErrors([]);
-
   };
 
 
@@ -138,12 +137,11 @@ function App() {
     setResult(null);
 
     setErrors([]);
-
   };
 
 
   // ==========================================
-  // Frontend Energy Optimizer
+  // REAL BACKEND OPTIMIZATION
   // ==========================================
 
   const handleOptimize = async () => {
@@ -179,206 +177,36 @@ function App() {
 
     try {
 
-      // Simulate optimization processing
-      await new Promise(
-        (resolve) =>
-          setTimeout(resolve, 1200)
-      );
-
-
       // --------------------------------------
-      // Create Hourly Optimization Plan
-      // --------------------------------------
-
-      const hourlyPlan =
-        scenario.hours.map((item) => {
-
-          // Solar used for demand
-          const solarUsed =
-            Math.min(
-              item.demand_kwh,
-              item.solar_kwh
-            );
-
-
-          // Remaining demand from grid
-          const gridKwh =
-            Math.max(
-              0,
-              item.demand_kwh -
-              solarUsed
-            );
-
-
-          // Grid cost
-          const cost =
-            gridKwh *
-            item.tariff_bdt_per_kwh;
-
-
-          // ----------------------------------
-          // Determine Action
-          // ----------------------------------
-
-          let action = "";
-
-          if (
-            item.solar_kwh >=
-            item.demand_kwh
-          ) {
-
-            action =
-              "Solar supplies demand";
-
-          } else if (
-            item.solar_kwh > 0
-          ) {
-
-            action =
-              "Solar + Grid supply demand";
-
-          } else {
-
-            action =
-              "Grid supplies demand";
-          }
-
-
-          // ----------------------------------
-          // Return Hour Plan
-          // ----------------------------------
-
-          return {
-
-            hour: item.hour,
-
-            demand_kwh:
-              item.demand_kwh,
-
-            solar_kwh:
-              item.solar_kwh,
-
-            solar_used_kwh:
-              solarUsed,
-
-            grid_kwh:
-              gridKwh,
-
-            battery_kwh:
-              0,
-
-            cost_bdt:
-              cost,
-
-            action:
-              action,
-          };
-
-        });
-
-
-      // --------------------------------------
-      // Total Grid Energy
-      // --------------------------------------
-
-      const totalGridKwh =
-        hourlyPlan.reduce(
-          (sum, item) =>
-            sum + item.grid_kwh,
-          0
-        );
-
-
-      // --------------------------------------
-      // Total Cost
-      // --------------------------------------
-
-      const totalCostBdt =
-        hourlyPlan.reduce(
-          (sum, item) =>
-            sum + item.cost_bdt,
-          0
-        );
-
-
-      // --------------------------------------
-      // Peak Grid Demand
-      // --------------------------------------
-
-      const peakGridKwh =
-        Math.max(
-          ...hourlyPlan.map(
-            (item) =>
-              item.grid_kwh
-          )
-        );
-
-
-      // --------------------------------------
-      // Operator Directives
-      // --------------------------------------
-
-      const directives =
-        scenario.operator_notes
-          .filter(
-            (note) =>
-              note.trim() !== ""
-          )
-          .map(
-            (note, index) => ({
-
-              directive_id:
-                index + 1,
-
-              operator_note:
-                note,
-
-              interpretation:
-                "Instruction accepted for energy optimization",
-
-            })
-          );
-
-
-      // --------------------------------------
-      // Final Result
-      // --------------------------------------
-
-      const demoResult = {
-
-        directive_interpretation:
-          directives,
-
-        hourly_plan:
-          hourlyPlan,
-
-        total_grid_kwh:
-          totalGridKwh,
-
-        total_cost_bdt:
-          totalCostBdt,
-
-        peak_grid_kwh:
-          peakGridKwh,
-
-        plan_summary:
-          "24-hour energy plan generated successfully using available solar energy and grid supply.",
-
-      };
-
-
-      // --------------------------------------
-      // Set Result
+      // Send Scenario To Backend
       // --------------------------------------
 
       console.log(
-        "Optimization Result:",
-        demoResult
+        "Sending scenario to backend:",
+        scenario
       );
 
-      setResult(
-        demoResult
+
+      const backendResult =
+        await optimizeEnergy(scenario);
+
+
+      // --------------------------------------
+      // Backend Response
+      // --------------------------------------
+
+      console.log(
+        "Backend optimization result:",
+        backendResult
       );
+
+
+      // --------------------------------------
+      // Save Backend Result
+      // --------------------------------------
+
+      setResult(backendResult);
+
 
     } catch (error) {
 
@@ -387,16 +215,24 @@ function App() {
         error
       );
 
+
+      // --------------------------------------
+      // Show Error
+      // --------------------------------------
+
       setErrors([
-        "Unable to generate optimization result."
+        error.message ||
+        "Unable to connect to the optimization API.",
       ]);
+
+      setResult(null);
+
 
     } finally {
 
       setLoading(false);
 
     }
-
   };
 
 
@@ -460,7 +296,7 @@ function App() {
 
             <span></span>
 
-            API Ready
+            API Connected
 
           </div>
 
@@ -527,6 +363,7 @@ function App() {
             type="button"
             className="secondary-button"
             onClick={handleLoadSample}
+            disabled={loading}
           >
 
             Load Sample Scenario
@@ -541,6 +378,7 @@ function App() {
             type="button"
             className="secondary-button danger"
             onClick={handleReset}
+            disabled={loading}
           >
 
             Reset
@@ -625,7 +463,7 @@ function App() {
 
             <DirectiveTable
               directives={
-                result.directive_interpretation
+                result.directive_interpretation || []
               }
             />
 
@@ -636,7 +474,7 @@ function App() {
 
             <EnergyTable
               plan={
-                result.hourly_plan
+                result.hourly_plan || []
               }
             />
 
@@ -698,9 +536,8 @@ function App() {
 
             <p>
 
-              Analyzing 24-hour demand,
-              solar generation and
-              electricity tariff.
+              Sending your 24-hour scenario
+              to the GridWise optimization API.
 
             </p>
 
@@ -708,12 +545,12 @@ function App() {
 
         )}
 
+
       </main>
 
     </div>
 
   );
-
 }
 
 
